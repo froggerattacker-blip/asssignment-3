@@ -15,29 +15,31 @@ public class Prim {
         PriorityQueue<Edge> queue = new PriorityQueue<>();
         long weight = 0;
         long edgeChecks = 0;
-        inTree[0] = true;
-        queue.addAll(graph.adjacent(0));
-        while (!queue.isEmpty()) {
-            Edge edge = queue.poll();
-            edgeChecks++;
-            if (inTree[edge.to]) {
+        int components = 0;
+        for (int start = 0; start < vertices; start++) {
+            if (inTree[start]) {
                 continue;
             }
-            inTree[edge.to] = true;
-            tree.add(edge);
-            weight += edge.weight;
-            for (Edge next : graph.adjacent(edge.to)) {
-                if (!inTree[next.to]) {
-                    queue.add(next);
+            components++;
+            inTree[start] = true;
+            queue.clear();
+            queue.addAll(graph.adjacent(start));
+            while (!queue.isEmpty()) {
+                Edge edge = queue.poll();
+                edgeChecks++;
+                if (inTree[edge.to]) {
+                    continue;
+                }
+                inTree[edge.to] = true;
+                tree.add(edge);
+                weight += edge.weight;
+                for (Edge next : graph.adjacent(edge.to)) {
+                    if (!inTree[next.to]) {
+                        queue.add(next);
+                    }
                 }
             }
         }
-        int visited = 0;
-        for (boolean flag : inTree) {
-            if (flag) {
-                visited++;
-            }
-        }
-        return new MstResult(tree, weight, visited == vertices ? 1 : 2, edgeChecks, 0);
+        return new MstResult(tree, weight, components, edgeChecks, 0);
     }
 }

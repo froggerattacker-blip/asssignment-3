@@ -17,6 +17,8 @@ public class Tests {
     public static void main(String[] args) {
         dsuBasics();
         smallGraphMst();
+        disconnectedGraph();
+        singleVertex();
         duplicateWeights();
         multipleValidMsts();
         kruskalMatchesPrimOnGeneratedGraphs();
@@ -58,6 +60,33 @@ public class Tests {
         check(prim.weight == 6, "Prim finds MST weight 6");
         check(kruskal.edges.size() == 3, "MST of 4 vertices has 3 edges");
         check(kruskal.connected && prim.connected, "graph is reported as connected");
+    }
+
+    private static void disconnectedGraph() {
+        Graph graph = new Graph(5);
+        graph.addEdge(0, 1, 4);
+        graph.addEdge(1, 2, 6);
+        graph.addEdge(3, 4, 2);
+        MstResult kruskal = Kruskal.run(graph);
+        MstResult prim = Prim.run(graph);
+        check(!kruskal.connected, "Kruskal detects a disconnected graph");
+        check(!prim.connected, "Prim detects a disconnected graph");
+        check(kruskal.components == 2, "two components are found");
+        check(kruskal.weight == prim.weight && kruskal.weight == 12, "spanning forest weight is 12");
+    }
+
+    private static void singleVertex() {
+        Graph graph = new Graph(1);
+        MstResult kruskal = Kruskal.run(graph);
+        MstResult prim = Prim.run(graph);
+        check(kruskal.weight == 0 && prim.weight == 0, "single vertex MST weight is 0");
+        check(kruskal.connected && prim.connected, "single vertex graph is connected");
+
+        Digraph digraph = new Digraph(1);
+        TopologicalSort.Result ordering = TopologicalSort.run(digraph);
+        check(ordering.acyclic && ordering.order.length == 1, "single vertex has a topological ordering");
+        check(Tarjan.run(digraph).count == 1, "single vertex forms one SCC");
+        check(Dijkstra.run(digraph, 0).distance[0] == 0, "distance to the source is 0");
     }
 
     private static void duplicateWeights() {
