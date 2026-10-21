@@ -3,14 +3,20 @@ package dsu;
 public class DSU {
     private final int[] parent;
     private final int[] rank;
+    private final boolean optimized;
     private int components;
     private long findCalls;
     private long unionCalls;
     private long pointerUpdates;
 
     public DSU(int size) {
+        this(size, true);
+    }
+
+    public DSU(int size, boolean optimized) {
         this.parent = new int[size];
         this.rank = new int[size];
+        this.optimized = optimized;
         this.components = size;
         for (int i = 0; i < size; i++) {
             parent[i] = i;
@@ -24,10 +30,12 @@ public class DSU {
             root = parent[root];
             pointerUpdates++;
         }
-        while (parent[vertex] != root) {
-            int next = parent[vertex];
-            parent[vertex] = root;
-            vertex = next;
+        if (optimized) {
+            while (parent[vertex] != root) {
+                int next = parent[vertex];
+                parent[vertex] = root;
+                vertex = next;
+            }
         }
         return root;
     }
@@ -39,7 +47,7 @@ public class DSU {
         if (rootA == rootB) {
             return false;
         }
-        if (rank[rootA] < rank[rootB]) {
+        if (optimized && rank[rootA] < rank[rootB]) {
             int swap = rootA;
             rootA = rootB;
             rootB = swap;
