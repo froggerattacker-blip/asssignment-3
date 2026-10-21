@@ -42,6 +42,11 @@ public class Dijkstra {
     }
 
     public static Result run(WeightedGraph graph, int source) {
+        for (Edge edge : graph.edges()) {
+            if (edge.weight < 0) {
+                throw new IllegalArgumentException("Dijkstra requires non-negative weights, found " + edge);
+            }
+        }
         int vertices = graph.vertexCount();
         long[] distance = new long[vertices];
         int[] previous = new int[vertices];
