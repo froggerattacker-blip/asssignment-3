@@ -120,9 +120,6 @@ public class Plot {
         if (value >= 100) {
             return String.valueOf(Math.round(value));
         }
-        if (value >= 1) {
-            return String.format("%.1f", value);
-        }
-        return String.format("%.3f", value);
+        return String.format("%.2f", value);
     }
 }
