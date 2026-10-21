@@ -28,6 +28,7 @@ public class Tests {
         knownSccStructure();
         dijkstraDistances();
         unreachableVertices();
+        negativeWeightsRejected();
 
         System.out.println();
         System.out.println("passed: " + passed + ", failed: " + failed);
@@ -160,15 +161,21 @@ public class Tests {
         Digraph graph = GraphGenerator.randomDigraph(1000, 5000, 13);
         Tarjan.Result scc = Tarjan.run(graph);
         int[] sizes = new int[scc.count];
+        boolean inRange = true;
         for (int component : scc.component) {
-            check(component >= 0 && component < scc.count, "component id is in range");
+            if (component < 0 || component >= scc.count) {
+                inRange = false;
+                continue;
+            }
             sizes[component]++;
         }
         int total = 0;
         for (int size : sizes) {
             total += size;
         }
+        check(inRange, "every component id is in range");
         check(total == graph.vertexCount(), "every vertex belongs to exactly one SCC");
+        check(scc.count > 1, "a random sparse digraph splits into several SCCs");
     }
 
     private static void knownSccStructure() {
@@ -208,6 +215,17 @@ public class Tests {
         check(!result.reachable(3), "isolated vertex stays unreachable");
         check(result.distance[3] == Dijkstra.UNREACHABLE, "unreachable distance stays at the sentinel value");
         check(result.pathTo(3).isEmpty(), "no path is returned for an unreachable vertex");
+    }
+
+    private static void negativeWeightsRejected() {
+        Digraph graph = new Digraph(2);
+        graph.addEdge(0, 1, -5);
+        try {
+            Dijkstra.run(graph, 0);
+            check(false, "negative weights are rejected");
+        } catch (IllegalArgumentException expected) {
+            check(true, "negative weights are rejected");
+        }
     }
 
     private static void check(boolean condition, String description) {
